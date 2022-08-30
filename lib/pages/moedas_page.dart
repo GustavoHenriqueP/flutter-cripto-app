@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_aula_1/models/moeda.dart';
+import 'package:flutter_aula_1/pages/moedas_detalhes_page.dart';
 import 'package:flutter_aula_1/repositories/moeda_repository.dart';
 import 'package:intl/intl.dart';
 
@@ -48,6 +49,14 @@ class _MoedasPageState extends State<MoedasPage> {
     }
   }
 
+  mostrarDetalhes(Moeda moeda)
+  {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => MoedasDetalhesPage(moeda: moeda,)
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) { //Método build cria o widget em si
     return Scaffold( //Scaffold serve para formatar nossa tela em um MaterialApp
@@ -75,7 +84,11 @@ class _MoedasPageState extends State<MoedasPage> {
             selectedTileColor: Colors.indigo[50],
             onTap: () { //Clicando em uma moeda quando na lista de seleção, ela é selecionada. Porém se ela já está selecionada, ela é removida
               setState(() { //Altera o estado do widget, permitindo um rebuild
-              if (selecionadas.isNotEmpty && !selecionadas.contains(tabela[moeda]))
+              if (selecionadas.isEmpty)
+              {
+                mostrarDetalhes(tabela[moeda]);
+              }
+              else if (selecionadas.isNotEmpty && !selecionadas.contains(tabela[moeda]))
               {
                 selecionadas.add(tabela[moeda]);
               }
@@ -93,6 +106,7 @@ class _MoedasPageState extends State<MoedasPage> {
                 }
               });
             },
+
           );
         }, 
         padding: const EdgeInsets.all(16), //Espaçamento em todas as laterais de um componente da lista

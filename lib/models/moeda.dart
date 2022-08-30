@@ -1,4 +1,4 @@
-/// Classe model para as moedas
+// Classe model para as moedas
 class Moeda{
   String icone;
   String nome;
