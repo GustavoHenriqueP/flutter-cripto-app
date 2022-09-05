@@ -49,6 +49,9 @@ class _MoedasPageState extends State<MoedasPage> {
     }
   }
 
+  /**
+   * Método que fará a rota para a page "MoedasDetalhesPage"
+   */
   mostrarDetalhes(Moeda moeda)
   {
     Navigator.push(context, MaterialPageRoute(

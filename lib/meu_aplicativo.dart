@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_aula_1/pages/home_page.dart';
 import 'package:flutter_aula_1/pages/moedas_page.dart';
 
 class MeuAplicativo extends StatelessWidget { //StatelessWidget - Um Widget imutável
@@ -16,7 +17,7 @@ class MeuAplicativo extends StatelessWidget { //StatelessWidget - Um Widget imut
       theme: ThemeData( //Tema do App. É possível definir sua cor, tema escuro / tema claro, etc
         primarySwatch: Colors.indigo, //Cor do tema
       ),
-      home: MoedasPage(), //Página inicial. Aqui puxamos uma classe que possui uma página montada pelo Scaffold
+      home: HomePage(), //Página inicial. Aqui puxamos uma classe que possui uma página montada pelo Scaffold
     );
   }
 }
