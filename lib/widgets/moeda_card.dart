@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_aula_1/configs/app_setting.dart';
 import 'package:flutter_aula_1/models/moeda.dart';
 import 'package:flutter_aula_1/pages/moedas_detalhes_page.dart';
 import 'package:flutter_aula_1/repositories/favoritas_repository.dart';
@@ -15,12 +16,19 @@ class MoedaCard extends StatefulWidget {
 }
 
 class _MoedaCardState extends State<MoedaCard> {
-  NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
+  late NumberFormat real; //Com o package "intl", conseguimos formatar os números para diferntes unidades de medida, como moeda por exemplo
+  late Map<String, String> loc;
 
   static Map<String, Color> precoColor = <String, Color>{
     'up': Colors.teal,
     'down': Colors.indigo,
   };
+
+  void readNumberFormat()
+  {
+    loc = context.watch<AppSettings>().locale;
+    real = NumberFormat.currency(locale: loc['locale'], name: loc['name']);
+  }
 
   abrirDetalhes() {
     Navigator.push(
@@ -33,6 +41,7 @@ class _MoedaCardState extends State<MoedaCard> {
 
   @override
   Widget build(BuildContext context) {
+    readNumberFormat();
     return Card(
       margin: EdgeInsets.only(top: 12),
       elevation: 2,
