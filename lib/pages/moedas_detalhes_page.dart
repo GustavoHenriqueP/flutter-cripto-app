@@ -1,9 +1,10 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_aula_1/configs/app_setting.dart';
 import 'package:flutter_aula_1/models/moeda.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class MoedasDetalhesPage extends StatefulWidget {
   Moeda moeda;
@@ -15,10 +16,17 @@ class MoedasDetalhesPage extends StatefulWidget {
 }
 
 class _MoedasDetalhesPageState extends State<MoedasDetalhesPage> {
-  NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$'); // Formata o valor para reais
+  late NumberFormat real; //Com o package "intl", conseguimos formatar os números para diferntes unidades de medida, como moeda por exemplo
+  late Map<String, String> loc;
   final _form = GlobalKey<FormState>(); // Gera uma key (identificador) para o formulário
   final _valor = TextEditingController(); // Permite editar o texto valor e controlá-lo
   double quantidade = 0;
+
+  void readNumberFormat()
+  {
+    loc = context.watch<AppSettings>().locale;
+    real = NumberFormat.currency(locale: loc['locale'], name: loc['name']);
+  }
 
   /**
    * Método acionado ao clicar no botão comprar
@@ -39,6 +47,8 @@ class _MoedasDetalhesPageState extends State<MoedasDetalhesPage> {
 
   @override
   Widget build(BuildContext context) {
+    readNumberFormat();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.moeda.nome),
@@ -102,7 +112,7 @@ class _MoedasDetalhesPageState extends State<MoedasDetalhesPage> {
                   labelText: 'Valor',
                   prefixIcon: Icon(Icons.monetization_on_outlined),
                   suffix: Text(
-                    'reais',
+                    loc['name'] == 'R\$' ? 'reais' : 'dólares',
                     style: TextStyle(fontSize: 14),
                   )
                 ),

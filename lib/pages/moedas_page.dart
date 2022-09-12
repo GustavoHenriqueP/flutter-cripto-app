@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_aula_1/configs/app_setting.dart';
 import 'package:flutter_aula_1/models/moeda.dart';
 import 'package:flutter_aula_1/pages/moedas_detalhes_page.dart';
+import 'package:flutter_aula_1/repositories/favoritas_repository.dart';
 import 'package:flutter_aula_1/repositories/moeda_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class MoedasPage extends StatefulWidget { ////StatefulWidget - Um Widget mutável
 
@@ -14,8 +17,38 @@ class MoedasPage extends StatefulWidget { ////StatefulWidget - Um Widget mutáve
 
 class _MoedasPageState extends State<MoedasPage> {
   final tabela = MoedaRepository.tabela; //Pega a tabela de moedas e coloca nesta variável lista
-  NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$'); //Com o package "intl", conseguimos formatar os números para diferntes unidades de medida, como moeda por exemplo
+  late NumberFormat real; //Com o package "intl", conseguimos formatar os números para diferntes unidades de medida, como moeda por exemplo
+  late Map<String, String> loc;
   List<Moeda> selecionadas = []; //Lista de moedas selecionadas
+  late FavoritasRepository favoritas;
+
+  void readNumberFormat()
+  {
+    loc = context.watch<AppSettings>().locale;
+    real = NumberFormat.currency(locale: loc['locale'], name: loc['name']);
+  }
+
+  changeLanguageButton()
+  {
+    final locale = loc['locale'] == 'pt_BR' ? 'en_US' : 'pt_BR';
+    final name = loc['name'] == 'R\$' ? '\$' : 'R\$';
+    
+    return PopupMenuButton(
+      icon: Icon(Icons.language),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.swap_vert),
+            title: Text('Usar $locale'),
+            onTap: () {
+              context.read<AppSettings>().setLocale(locale, name);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ]
+    );
+  }
 
   AppBar appBarDinamica()
   {
@@ -23,6 +56,9 @@ class _MoedasPageState extends State<MoedasPage> {
     {
       return AppBar( //Barra do App
         title: const Text('Cripto Moedas'), //Título App
+        actions: [
+          changeLanguageButton(),
+        ],
       );
     }
     else //Se lista de selecionadas não estiver vazia, fica na AppBar de selecionadas
@@ -52,7 +88,7 @@ class _MoedasPageState extends State<MoedasPage> {
   /**
    * Método que fará a rota para a page "MoedasDetalhesPage"
    */
-  mostrarDetalhes(Moeda moeda)
+  void mostrarDetalhes(Moeda moeda)
   {
     Navigator.push(context, MaterialPageRoute(
       builder: (_) => MoedasDetalhesPage(moeda: moeda,)
@@ -60,8 +96,19 @@ class _MoedasPageState extends State<MoedasPage> {
     );
   }
 
+  void limparSelecionadas()
+  {
+    setState(() {
+      selecionadas = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) { //Método build cria o widget em si
+    // favoritas = Provider.of<FavoritasRepository>(context);
+    favoritas = context.watch<FavoritasRepository>();
+    readNumberFormat();
+
     return Scaffold( //Scaffold serve para formatar nossa tela em um MaterialApp
       appBar: appBarDinamica(),
       body: ListView.separated( //Corpo do App - Neste caso, uma ListView
@@ -78,10 +125,19 @@ class _MoedasPageState extends State<MoedasPage> {
               width: 40,
               child: Image.asset(tabela[moeda].icone), //Caminho para o ícone das moedas
               ), 
-            title: Text(tabela[moeda].nome, style: TextStyle( //Título do componente
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-              )), 
+            title: Row(
+              children: [
+                Text(
+                  tabela[moeda].nome, 
+                  style: TextStyle( //Título do componente
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if(favoritas.lista.contains(tabela[moeda]))
+                  Icon(Icons.circle, color: Colors.amber, size: 8),
+              ],
+            ), 
             trailing: Text(real.format(tabela[moeda].preco)), //Texto presente no lado direito
             selected: selecionadas.contains(tabela[moeda]),
             selectedTileColor: Colors.indigo[50],
@@ -119,7 +175,10 @@ class _MoedasPageState extends State<MoedasPage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, //Define a posição do FAB no centro
         floatingActionButton: selecionadas.isNotEmpty //Verifica se está na tela de selecionadas
           ? FloatingActionButton.extended(
-            onPressed: () {},
+            onPressed: () {
+              favoritas.saveAll(selecionadas);
+              limparSelecionadas();
+            },
             icon: Icon(Icons.star),
             label: Text(
               'FAVORITAR',
